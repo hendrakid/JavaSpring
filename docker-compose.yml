@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  #  app:
+  #    container_name: spring-boot-app
+  #    build: .
+  #    ports:
+  #      - "8081:8081"
+  #      - "5005:5005"  # only for remote debugging port
+  #    depends_on:
+  #      - db
+  #      - kafka
+  #    environment:
+  #      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mydatabase
+  #      SPRING_DATASOURCE_USERNAME: postgres
+  #      SPRING_DATASOURCE_PASSWORD: postgres
+  #      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+  #      SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS: kafka:9092
+  #      SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS: kafka:9092
+  #      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+  #    networks:
+  #      - locnet
+
+  db:
+    image: postgres:latest
+    container_name: postgres_container
+    restart: always
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - locnet
+
+
+  kafka:
+    image: bashj79/kafka-kraft:latest
+    container_name: kafka
+    restart: always
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_METADATA_LOG_DIRS: /var/lib/kafka/metadata
+    networks:
+      - locnet
+
+
+
+networks:
+  locnet:
+    driver: bridge
